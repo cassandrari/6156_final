@@ -13,7 +13,7 @@ st.title('Machine Downtime Prediction')
 
 # Upload CSV File
 st.sidebar.header('Upload Your CSV File')
-uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type='csv')
+uploaded_file = pd.read_csv('Machine_Downtime.csv')
 
 if uploaded_file is not None:
     # Load the dataset
