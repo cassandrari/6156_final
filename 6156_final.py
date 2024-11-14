@@ -11,17 +11,19 @@ for machine in machines:
     # Filter data for the current machine
     machine_data = df[df['Machine_ID'] == machine]
 
-    # Create columns for side-by-side graphs
-    col1, col2, col3 = st.columns(3)
-
-    # 1. Trend analysis graph (line chart for downtime trend)
-    with col1:
-        st.subheader(f"Downtime Trend for {machine}")
-        downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
-        downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
-        fig = px.line(downtime_trends, 
-                      x=downtime_trends.index, 
-                      y='Downtime', 
-                      title=f'Downtime Trend for {machine}', 
-                      labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
-        st.plotly_chart(fig)
+    # 1. Downtime trend (line chart)
+    st.subheader(f"Downtime Trend for {machine}")
+    
+    # Group by Date and calculate downtime events
+    downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
+    downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
+    
+    # Create line chart
+    fig = px.line(downtime_trends, 
+                  x=downtime_trends.index, 
+                  y='Downtime', 
+                  title=f'Downtime Trend for {machine}', 
+                  labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
+    
+    # Display the plot
+    st.plotly_chart(fig)
