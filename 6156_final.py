@@ -25,25 +25,3 @@ for machine in machines:
                       title=f'Downtime Trend for {machine}', 
                       labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
         st.plotly_chart(fig)
-
-    # 2. Scatter plot showing the relationship between temperature and pressure
-    with col2:
-        st.subheader(f"Temperature vs Pressure for {machine}")
-        fig, ax = plt.subplots(figsize=(6, 4))
-        ax.scatter(machine_data['Hydraulic_Pressure(bar)'], machine_data['Torque(Nm)'], color='blue')
-        ax.set_xlabel('Hydraulic Pressure')
-        ax.set_ylabel('Torque (Nm)')
-        ax.set_title(f'Hydraulic Pressure vs Torque for {machine}')
-        st.pyplot(fig)
-
-    # 3. Bar chart showing the count of downtime events (Y vs N)
-    with col3:
-        st.subheader(f"Downtime Distribution for {machine}")
-        downtime_counts = machine_data['Downtime'].value_counts()
-        fig = plt.figure(figsize=(6, 4))
-        ax = fig.add_subplot(111)
-        ax.bar(downtime_counts.index, downtime_counts.values, color=['red', 'green'])
-        ax.set_xlabel('Downtime Status')
-        ax.set_ylabel('Count')
-        ax.set_title(f"Downtime Status Distribution for {machine}")
-        st.pyplot(fig)
