@@ -7,23 +7,25 @@ df = pd.read_csv('Machine_Downtime.csv')
 
 machines = df['Machine_ID'].unique()
 
-for machine in machines:
-    # Filter data for the current machine
-    machine_data = df[df['Machine_ID'] == machine]
+# Add a selectbox to choose a machine
+machine = st.selectbox("Select Machine", machines)
 
-    # 1. Downtime trend (line chart)
-    st.subheader(f"Downtime Trend for {machine}")
-    
-    # Group by Date and calculate downtime events
-    downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
-    downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
-    
-    # Create line chart
-    fig = px.line(downtime_trends, 
-                  x=downtime_trends.index, 
-                  y='Downtime', 
-                  title=f'Downtime Trend for {machine}', 
-                  labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
-    
-    # Display the plot
-    st.plotly_chart(fig)
+# Filter data for the selected machine
+machine_data = df[df['Machine_ID'] == machine]
+
+# 1. Downtime trend (line chart)
+st.subheader(f"Downtime Trend for {machine}")
+
+# Group by Date and calculate downtime events
+downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
+downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
+
+# Create line chart
+fig = px.line(downtime_trends, 
+              x=downtime_trends.index, 
+              y='Downtime', 
+              title=f'Downtime Trend for {machine}', 
+              labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
+
+# Display the plot
+st.plotly_chart(fig)
