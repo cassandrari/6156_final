@@ -15,7 +15,7 @@ downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clar
 fig = px.line(downtime_trends, 
               x=downtime_trends.index, 
               y='Downtime', 
-              title=f'Downtime Trend for {machine}',
+              title=f'Downtime Trend for {Machine_ID}',
               labels={'Date': 'Date', 'Downtime': 'Number of Downtime Events'})
 
 st.plotly_chart(fig)
