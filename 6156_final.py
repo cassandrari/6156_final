@@ -10,6 +10,8 @@ df['Date'] = pd.to_datetime(df['Date'])
 
 # Filter to include only data from January 1, 2022 and beyond
 df = df[df['Date'] >= '2021-12-20']
+df = df[df['Date'] <= '2022-07-02']
+
 
 # List of unique machines
 machines = df['Machine_ID'].unique()
