@@ -3,41 +3,64 @@ import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
 
+#dataset
 df = pd.read_csv('Machine_Downtime.csv')
-
-# Convert 'Date' column to datetime format
 df['Date'] = pd.to_datetime(df['Date'])
-
-# Filter to include only data from January 1, 2022 and beyond
 df = df[df['Date'] >= '2021-12-20']
-df = df[df['Date'] <= '2022-07-02']
-
-
-# List of unique machines
 machines = df['Machine_ID'].unique()
 
-# Add a selectbox to choose a machine
+#select box
 machine = st.selectbox("Select Machine", machines)
-
-# Filter data for the selected machine
 machine_data = df[df['Machine_ID'] == machine]
 
-# Sort the data by Date to ensure chronological order
+#trend analysis
 machine_data = machine_data.sort_values(by='Date')
-
-# 1. Downtime trend (line chart)
 st.subheader(f"Downtime Trend for {machine}")
-
-# Group by Date and calculate downtime events
 downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
 downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
-
-# Create line chart
 fig = px.line(downtime_trends, 
               x=downtime_trends.index, 
               y='Downtime', 
               title=f'Downtime Trend for {machine}', 
               labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
+st.plotly_chart(fig)
+
+machine_data['Month'] = machine_data['Date'].dt.to_period('M')  # Extract month-year from date
+monthly_downtime = machine_data.groupby('Month')['Downtime'].value_counts().unstack(fill_value=0)
+
+# Calculate the percentage of downtime for each month
+monthly_downtime['Total_Days'] = monthly_downtime['No Downtime'] + monthly_downtime['Downtime']
+monthly_downtime['Downtime_Percentage'] = (monthly_downtime['Downtime'] / monthly_downtime['Total_Days']) * 100
+
+# Identify months where downtime is greater than 10%
+major_downtime_months = monthly_downtime[monthly_downtime['Downtime_Percentage'] > 10]
+
+# Create the line chart for daily downtime trend
+st.subheader(f"Downtime Trend for {machine}")
+
+# Group by Date and count downtime events
+downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
+downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
+
+# Create Plotly figure for downtime trend
+fig = px.line(downtime_trends, 
+              x=downtime_trends.index, 
+              y='Downtime', 
+              title=f'Downtime Trend for {machine}', 
+              labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
+
+# Highlight months where downtime is greater than 10% with vertical rectangles
+for month in major_downtime_months.index:
+    # Find the first and last day of the month
+    start_date = month.start_time
+    end_date = month.end_time
+
+    # Add vertical rectangles to highlight the month
+    fig.add_vrect(x0=start_date, 
+                  x1=end_date, 
+                  fillcolor="red", 
+                  opacity=0.2, 
+                  line_width=0)
 
 # Display the plot
 st.plotly_chart(fig)
