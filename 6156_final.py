@@ -32,14 +32,14 @@ st.plotly_chart(fig)
 
 
 
-downtime_trends = machine_data.groupby('Date')['Machine_Failure'].value_counts().unstack(fill_value=0)
+downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
 
-# The 'Machine_Failure' and 'No_Machine_Failure' are values, not column names
+# Rename the columns for clarity
 downtime_trends.columns = ['No Machine Failure', 'Machine Failure']  # Rename the columns
 
 # Calculate Monthly Downtime
 machine_data['Month'] = machine_data['Date'].dt.to_period('M')  # Extract month-year from date
-monthly_downtime = machine_data.groupby('Month')['Machine_Failure'].value_counts().unstack(fill_value=0)
+monthly_downtime = machine_data.groupby('Month')['Downtime'].value_counts().unstack(fill_value=0)
 
 # Rename the columns for clarity
 monthly_downtime.columns = ['No Machine Failure', 'Machine Failure']
