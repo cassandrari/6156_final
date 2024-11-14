@@ -9,7 +9,7 @@ machines = df['Machine_ID'].unique()
 
 for machine in machines:
     # Filter data for the current machine
-    machine_data = df[df['Machine'] == machine]
+    machine_data = df[df['Machine_ID'] == machine]
 
     # Create columns for side-by-side graphs
     col1, col2, col3 = st.columns(3)
