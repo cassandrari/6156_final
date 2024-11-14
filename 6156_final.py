@@ -30,10 +30,10 @@ for machine in machines:
     with col2:
         st.subheader(f"Temperature vs Pressure for {machine}")
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.scatter(machine_data['Temperature (°C)'], machine_data['Pressure (bar)'], color='blue')
-        ax.set_xlabel('Temperature (°C)')
-        ax.set_ylabel('Pressure (bar)')
-        ax.set_title(f'Temperature vs Pressure for {machine}')
+        ax.scatter(machine_data['Hydraulic_Pressure(bar)'], machine_data['Torque(Nm)'], color='blue')
+        ax.set_xlabel('Hydraulic Pressure')
+        ax.set_ylabel('Torque (Nm)')
+        ax.set_title(f'Hydraulic Pressure vs Torque for {machine}')
         st.pyplot(fig)
 
     # 3. Bar chart showing the count of downtime events (Y vs N)
