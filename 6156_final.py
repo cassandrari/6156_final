@@ -5,8 +5,13 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv('Machine_Downtime.csv')
 
+# Convert 'Date' column to datetime format
 df['Date'] = pd.to_datetime(df['Date'])
 
+# Filter to include only data from January 1, 2022 and beyond
+df = df[df['Date'] >= '2022-01-01']
+
+# List of unique machines
 machines = df['Machine_ID'].unique()
 
 # Add a selectbox to choose a machine
