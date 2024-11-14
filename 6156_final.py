@@ -25,12 +25,28 @@ fig = px.line(downtime_trends,
               labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
 st.plotly_chart(fig)
 
+
+
+
+
+
+
+
+downtime_trends = machine_data.groupby('Date')['Machine_Failure'].value_counts().unstack(fill_value=0)
+
+# The 'Machine_Failure' and 'No_Machine_Failure' are values, not column names
+downtime_trends.columns = ['No Machine Failure', 'Machine Failure']  # Rename the columns
+
+# Calculate Monthly Downtime
 machine_data['Month'] = machine_data['Date'].dt.to_period('M')  # Extract month-year from date
-monthly_downtime = machine_data.groupby('Month')['Downtime'].value_counts().unstack(fill_value=0)
+monthly_downtime = machine_data.groupby('Month')['Machine_Failure'].value_counts().unstack(fill_value=0)
+
+# Rename the columns for clarity
+monthly_downtime.columns = ['No Machine Failure', 'Machine Failure']
 
 # Calculate the percentage of downtime for each month
-monthly_downtime['Total_Days'] = monthly_downtime['No Downtime'] + monthly_downtime['Downtime']
-monthly_downtime['Downtime_Percentage'] = (monthly_downtime['Downtime'] / monthly_downtime['Total_Days']) * 100
+monthly_downtime['Total_Days'] = monthly_downtime['No Machine Failure'] + monthly_downtime['Machine Failure']
+monthly_downtime['Downtime_Percentage'] = (monthly_downtime['Machine Failure'] / monthly_downtime['Total_Days']) * 100
 
 # Identify months where downtime is greater than 10%
 major_downtime_months = monthly_downtime[monthly_downtime['Downtime_Percentage'] > 10]
@@ -38,16 +54,12 @@ major_downtime_months = monthly_downtime[monthly_downtime['Downtime_Percentage']
 # Create the line chart for daily downtime trend
 st.subheader(f"Downtime Trend for {machine}")
 
-# Group by Date and count downtime events
-downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
-downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
-
 # Create Plotly figure for downtime trend
 fig = px.line(downtime_trends, 
               x=downtime_trends.index, 
-              y='Downtime', 
+              y='Machine Failure', 
               title=f'Downtime Trend for {machine}', 
-              labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
+              labels={'Date': 'Date', 'Machine Failure': 'Machine Failure Events'})
 
 # Highlight months where downtime is greater than 10% with vertical rectangles
 for month in major_downtime_months.index:
