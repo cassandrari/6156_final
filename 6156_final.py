@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv('Machine_Downtime.csv')
 
+df['Date'] = pd.to_datetime(df['Date'])
+
 machines = df['Machine_ID'].unique()
 
 # Add a selectbox to choose a machine
@@ -12,6 +14,9 @@ machine = st.selectbox("Select Machine", machines)
 
 # Filter data for the selected machine
 machine_data = df[df['Machine_ID'] == machine]
+
+# Sort the data by Date to ensure chronological order
+machine_data = machine_data.sort_values(by='Date')
 
 # 1. Downtime trend (line chart)
 st.subheader(f"Downtime Trend for {machine}")
