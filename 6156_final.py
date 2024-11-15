@@ -60,18 +60,17 @@ st.table(downtime_proportion_table)
 
 
 le = LabelEncoder()
-df['Downtime'] = le.fit_transform(df['Downtime'])
+df['Downtime'] = le.fit_transform(df['Downtime'])  # 'Machine Failure' -> 1, 'No Machine Failure' -> 0
 
-# Select the columns that are likely relevant for predicting failure
-# Include numerical columns such as hydraulic pressure, temperature, etc.
-# Assuming you have some numeric columns like 'Hydraulic_Pressure', 'Temperature', 'Humidity', etc.
-# Replace with your actual columns.
+# Dynamically select all columns except 'Machine_ID' and 'Downtime' for prediction
 features = [col for col in df.columns if col not in ['Machine_ID', 'Downtime', 'Date']]
 
-# Handle missing values by filling with the mean (or another imputation strategy)
-df = df[features].fillna(df.mean())
+# Handle missing values by filling with the column's mean (other strategies like median or mode may also work)
+# Select only numeric columns and fill missing values in these columns
+numeric_features = df[features].select_dtypes(include=['float64', 'int64'])
+df[numeric_features.columns] = numeric_features.fillna(numeric_features.mean())
 
-# Add the target variable (Downtime)
+# Prepare feature matrix (X) and target vector (y)
 X = df[features]
 y = df['Downtime']
 
