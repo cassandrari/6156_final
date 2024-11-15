@@ -31,17 +31,7 @@ st.plotly_chart(fig)
 
 
 
-selected_machine_downtime = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
-st.write(selected_machine_downtime[['Month', 'Downtime_Percentage']])
 
-
-
-
-
-
-df['Month'] = df['Date'].dt.to_period('M')
-
-# Group by machine and month, and count occurrences of 'Machine_Failure' and 'No_Machine_Failure'
 monthly_downtime_all_machines = df.groupby(['Machine_ID', 'Month'])['Downtime'].value_counts().unstack(fill_value=0)
 
 # Rename the columns for clarity
@@ -64,16 +54,18 @@ max_month = monthly_downtime_all_machines['Month'].max()
 # Filter out the first and last month
 monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_all_machines['Month'] > min_month) & (monthly_downtime_all_machines['Month'] < max_month)]
 
-# Set the title for the layout
-st.title(f"Downtime Comparison for Machine {machine} vs Others")
+# Now, create a table for the selected machine's downtime proportions across months.
+selected_machine_data = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
 
-# Create the bar chart showing monthly downtime proportions for all machines
-fig = px.bar(monthly_downtime_all_machines,
-             x='Month',  # X-axis: months
-             y='Downtime_Percentage',  # Y-axis: downtime percentage
-             color='Machine_ID',  # Color bars by machine
-             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': ' '},
-             barmode='group')
+# Create a horizontal table: 'Month' will be columns, downtime proportion will be the row
+downtime_proportion_table = selected_machine_data.pivot(index='Machine_ID', columns='Month', values='Downtime_Percentage')
 
-# Display the chart
-st.plotly_chart(fig)
+# Display the table as horizontal
+st.subheader(f"Downtime Proportion for {machine} by Month")
+st.table(downtime_proportion_table)
+
+
+
+
+
+
