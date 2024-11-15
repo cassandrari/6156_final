@@ -66,8 +66,7 @@ with col1:
     # Create the line chart for downtime trend
     fig = px.line(downtime_trends, 
                   x=downtime_trends.index, 
-                  y='Machine Failure', 
-                  title=f'Downtime Trend for {machine}', 
+                  y='Machine Failure',  
                   labels={'Date': 'Date', 'Machine Failure': 'Machine Failure Events'})
     st.plotly_chart(fig)
 
