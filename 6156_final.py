@@ -59,11 +59,15 @@ st.table(downtime_proportion_table)
 
 
 
-le = LabelEncoder()
-df['Downtime'] = le.fit_transform(df['Downtime'])  # 'Machine Failure' -> 1, 'No Machine Failure' -> 0
+if df['Downtime'].dtype == 'object':  # Only apply LabelEncoder if it's not numeric
+    if df['Downtime'].isna().sum() > 0:
+        # Handle missing values in Downtime column before encoding (e.g., by filling with a default value)
+        df['Downtime'] = df['Downtime'].fillna('No Machine Failure')
+    le = LabelEncoder()
+    df['Downtime'] = le.fit_transform(df['Downtime'])  # 'Machine Failure' -> 1, 'No Machine Failure' -> 0
 
-# Dynamically select all columns except 'Machine_ID' and 'Downtime' for prediction
-features = [col for col in df.columns if col not in ['Machine_ID', 'Downtime', 'Date','Assembly_Line_No']]
+# Dynamically select all columns except 'Machine_ID', 'Downtime', 'Date', 'Assembly_Line_No' for prediction
+features = [col for col in df.columns if col not in ['Machine_ID', 'Downtime', 'Date', 'Assembly_Line_No']]
 
 # Handle missing values by filling with the column's mean (other strategies like median or mode may also work)
 # Select only numeric columns and fill missing values in these columns
@@ -71,46 +75,53 @@ numeric_features = df[features].select_dtypes(include=['float64', 'int64'])
 df[numeric_features.columns] = numeric_features.fillna(numeric_features.mean())
 
 # Prepare feature matrix (X) and target vector (y)
-x = df[features]
+X = df[features]
 y = df['Downtime']
+
+# Ensure no infinite values in the feature matrix
+X = X.replace([np.inf, -np.inf], np.nan).fillna(X.mean())
 
 # Train a Random Forest Classifier to assess feature importance
 model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(x, y)
 
-# Get the feature importance from the model
-feature_importance = model.feature_importances_
+try:
+    model.fit(X, y)
+except ValueError as e:
+    st.error(f"Error during model fitting: {e}")
+else:
+    # Get the feature importance from the model
+    feature_importance = model.feature_importances_
 
-# Create a DataFrame to show the feature importance in a readable format
-feature_importance_df = pd.DataFrame({
-    'Feature': features,
-    'Importance': feature_importance
-})
+    # Create a DataFrame to show the feature importance in a readable format
+    feature_importance_df = pd.DataFrame({
+        'Feature': features,
+        'Importance': feature_importance
+    })
 
-# Sort features by importance
-feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
+    # Sort features by importance
+    feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
 
-# Streamlit Display: Show a title
-st.markdown("<h3 style='text-align: center;'>Top Predictors of Machine Failure</h3>", unsafe_allow_html=True)
+    # Streamlit Display: Show a title
+    st.markdown("<h3 style='text-align: center;'>Top Predictors of Machine Failure</h3>", unsafe_allow_html=True)
 
-# Display feature importance table
-st.write("### Key Machine Metrics That Impact Failure Prediction")
-st.table(feature_importance_df)
+    # Display feature importance table
+    st.write("### Key Machine Metrics That Impact Failure Prediction")
+    st.table(feature_importance_df)
 
-# Visualize the top 2-3 important features with a bar chart
-top_features = feature_importance_df.head(3)
+    # Visualize the top 2-3 important features with a bar chart
+    top_features = feature_importance_df.head(3)
 
-fig = plt.figure(figsize=(8, 5))
-plt.bar(top_features['Feature'], top_features['Importance'], color='skyblue')
-plt.title('Top 3 Features Affecting Machine Failure', fontsize=14)
-plt.xlabel('Feature')
-plt.ylabel('Importance')
-st.pyplot(fig)
+    fig = plt.figure(figsize=(8, 5))
+    plt.bar(top_features['Feature'], top_features['Importance'], color='skyblue')
+    plt.title('Top 3 Features Affecting Machine Failure', fontsize=14)
+    plt.xlabel('Feature')
+    plt.ylabel('Importance')
+    st.pyplot(fig)
 
-# Now you can display additional details about these metrics
-# Example: Show summary statistics for the most important variables
-st.write("### Summary Statistics of Important Variables")
+    # Now you can display additional details about these metrics
+    # Example: Show summary statistics for the most important variables
+    st.write("### Summary Statistics of Important Variables")
 
-for feature in top_features['Feature']:
-    st.write(f"**{feature}**:")
-    st.write(df[feature].describe())
+    for feature in top_features['Feature']:
+        st.write(f"**{feature}**:")
+        st.write(df[feature].describe())
