@@ -32,6 +32,10 @@ st.plotly_chart(fig)
 
 
 
+
+
+
+
 df['Month'] = df['Date'].dt.to_period('M')
 
 # Group by machine and month, and count occurrences of 'Machine Failure' and 'No Machine Failure'
@@ -61,15 +65,11 @@ monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_
 # We only want data for the selected machine.
 selected_machine_data = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
 
-# Create a table: 'Month' will be columns, downtime proportion will be the row
-# We use pivot to get downtime percentage for each month
+# Create a horizontal table: 'Month' will be columns, downtime proportion will be the row
 downtime_proportion_table = selected_machine_data.pivot(index='Machine_ID', columns='Month', values='Downtime_Percentage')
 
-# Now, drop the 'Machine_ID' index, so it doesn't show up in the table
+# Remove the 'Machine_ID' column and show only the downtime proportion
 downtime_proportion_table = downtime_proportion_table.drop(columns='Machine_ID', errors='ignore')
-
-# Transpose the table to get months as columns
-downtime_proportion_table = downtime_proportion_table.T  # Transpose to get months as rows
 
 # Display the table as horizontal with one row for the selected machine
 st.subheader(f"Downtime Proportion by Month for {machine}")
