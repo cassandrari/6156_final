@@ -48,6 +48,12 @@ monthly_downtime_all_machines['Downtime_Percentage'] = (monthly_downtime_all_mac
 # Exclude the first and last month
 monthly_downtime_all_machines = monthly_downtime_all_machines.iloc[1:-1]
 
+# Reset the index to flatten the MultiIndex
+monthly_downtime_all_machines = monthly_downtime_all_machines.reset_index()
+
+# Convert 'Month' to string for proper x-axis labels in the bar chart
+monthly_downtime_all_machines['Month'] = monthly_downtime_all_machines['Month'].astype(str)
+
 # Create a container to hold both the graph and table
 container = st.container()
 
@@ -61,9 +67,9 @@ col1, col2 = container.columns([2, 1])  # Graph takes up 2/3 and table takes up 
 with col1:
     # Create a comparison bar chart for all machines
     fig = px.bar(monthly_downtime_all_machines,
-                 x=monthly_downtime_all_machines.index.astype(str), 
-                 y='Downtime_Percentage', 
-                 color=monthly_downtime_all_machines.index.get_level_values('Machine_ID'),
+                 x='Month',  # X-axis: months
+                 y='Downtime_Percentage',  # Y-axis: downtime percentage
+                 color='Machine_ID',  # Color bars by machine
                  title=f"Comparison of Monthly Downtime Proportions",
                  labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
                  barmode='group')
@@ -72,5 +78,5 @@ with col1:
 # In the second column (smaller), show the table for the selected machine
 with col2:
     # Filter for the selected machine and show the monthly downtime proportions
-    selected_machine_downtime = monthly_downtime_all_machines.xs(machine, level='Machine_ID')
-    st.write(selected_machine_downtime[['Downtime_Percentage']])
+    selected_machine_downtime = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
+    st.write(selected_machine_downtime[['Month', 'Downtime_Percentage']])
