@@ -59,69 +59,66 @@ st.table(downtime_proportion_table)
 
 
 
-if df['Downtime'].dtype == 'object':  # Only apply LabelEncoder if it's not numeric
-    if df['Downtime'].isna().sum() > 0:
-        # Handle missing values in Downtime column before encoding (e.g., by filling with a default value)
-        df['Downtime'] = df['Downtime'].fillna('No Machine Failure')
-    le = LabelEncoder()
-    df['Downtime'] = le.fit_transform(df['Downtime'])  # 'Machine Failure' -> 1, 'No Machine Failure' -> 0
 
-# Dynamically select all columns except 'Machine_ID', 'Downtime', 'Date', 'Assembly_Line_No' for prediction
-features = [col for col in df.columns if col not in ['Machine_ID', 'Downtime', 'Date', 'Assembly_Line_No']]
 
-# Handle missing values by filling with the column's mean (other strategies like median or mode may also work)
-# Select only numeric columns and fill missing values in these columns
-numeric_features = df[features].select_dtypes(include=['float64', 'int64'])
-df[numeric_features.columns] = numeric_features.fillna(numeric_features.mean())
 
-# Prepare feature matrix (X) and target vector (y)
-X = df[features]
-y = df['Downtime']
 
-# Ensure no infinite values in the feature matrix
-X = X.replace([np.inf, -np.inf], np.nan).fillna(X.mean())
+df_cleaned = df.dropna(subset=['Downtime'])
 
-# Train a Random Forest Classifier to assess feature importance
+# Encode the categorical target variable 'Downtime' (if necessary)
+label_encoder = LabelEncoder()
+df_cleaned['Downtime'] = label_encoder.fit_transform(df_cleaned['Downtime'])
+
+# Features and target
+X = df_cleaned[['Temperature', 'Pressure', 'Operational_Time']]  # Add other relevant features here
+y = df_cleaned['Downtime']
+
+# Split the data for training the model
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a Random Forest model
 model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
 
-try:
-    model.fit(X, y)
-except ValueError as e:
-    st.error(f"Error during model fitting: {e}")
+# Get feature importances
+feature_importances = model.feature_importances_
+feature_names = X.columns
+
+# Create a DataFrame to display the critical variables and their importance
+importance_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Importance': feature_importances
+}).sort_values(by='Importance', ascending=False)
+
+# Display most critical variables
+st.markdown(f"<h3 style='text-align: center;'>Critical Variables Causing Machine Failure</h3>", unsafe_allow_html=True)
+st.table(importance_df)
+
+# --------------- HEALTH SCORE -------------------
+
+# Get the predicted probabilities for the machine's failure
+machine_data = machine_data.sort_values(by='Date')
+X_machine = machine_data[['Temperature', 'Pressure', 'Operational_Time']]  # Adjust features as needed
+
+# Ensure that we are predicting for the selected machine
+if not X_machine.empty:
+    health_probabilities = model.predict_proba(X_machine)[:, 1]  # Probability of failure (class 1)
+    health_scores = 1 - health_probabilities  # Higher probability means worse health, so inverse for health score
+
+    # Add health score to the machine data
+    machine_data['Health_Score'] = health_scores
+
+    # Display health score graph
+    st.markdown(f"<h3 style='text-align: center;'>Health Score of the Machine</h3>", unsafe_allow_html=True)
+    fig_health = px.line(machine_data, 
+                         x='Date', 
+                         y='Health_Score', 
+                         labels={'Date': 'Date', 'Health_Score': 'Health Score'}, 
+                         title=f"Health Score of Machine {machine}")
+    st.plotly_chart(fig_health)
+
 else:
-    # Get the feature importance from the model
-    feature_importance = model.feature_importances_
+    st.warning("Not enough data available for health score calculation.")
 
-    # Create a DataFrame to show the feature importance in a readable format
-    feature_importance_df = pd.DataFrame({
-        'Feature': features,
-        'Importance': feature_importance
-    })
 
-    # Sort features by importance
-    feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
 
-    # Streamlit Display: Show a title
-    st.markdown("<h3 style='text-align: center;'>Top Predictors of Machine Failure</h3>", unsafe_allow_html=True)
-
-    # Display feature importance table
-    st.write("### Key Machine Metrics That Impact Failure Prediction")
-    st.table(feature_importance_df)
-
-    # Visualize the top 2-3 important features with a bar chart
-    top_features = feature_importance_df.head(3)
-
-    fig = plt.figure(figsize=(8, 5))
-    plt.bar(top_features['Feature'], top_features['Importance'], color='skyblue')
-    plt.title('Top 3 Features Affecting Machine Failure', fontsize=14)
-    plt.xlabel('Feature')
-    plt.ylabel('Importance')
-    st.pyplot(fig)
-
-    # Now you can display additional details about these metrics
-    # Example: Show summary statistics for the most important variables
-    st.write("### Summary Statistics of Important Variables")
-
-    for feature in top_features['Feature']:
-        st.write(f"**{feature}**:")
-        st.write(df[feature].describe())
