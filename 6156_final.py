@@ -43,14 +43,25 @@ monthly_downtime.columns = ['No Machine Failure', 'Machine Failure']
 monthly_downtime['Total_Days'] = monthly_downtime['No Machine Failure'] + monthly_downtime['Machine Failure']
 monthly_downtime['Downtime_Percentage'] = (monthly_downtime['Machine Failure'] / monthly_downtime['Total_Days']) * 100
 
-# Display the downtime percentage as a table
-st.subheader(f"Monthly Downtime Proportion for {machine}")
-st.write(monthly_downtime[['Downtime_Percentage']])
+# Exclude the first and last month
+monthly_downtime = monthly_downtime.iloc[1:-1]
 
-# Optionally, you can visualize the downtime percentage as a bar chart
-fig = px.bar(monthly_downtime, 
-             x=monthly_downtime.index.astype(str), 
-             y='Downtime_Percentage', 
-             title=f'Monthly Downtime Proportion for {machine}',
-             labels={'Downtime_Percentage': 'Downtime (%)', 'Month': 'Month'})
-st.plotly_chart(fig)
+# Create columns for layout
+col1, col2 = st.columns([2, 1])  # Graph takes up 2/3 and table takes up 1/3
+
+# In the first column (larger), show the graph
+with col1:
+    st.subheader(f"Monthly Downtime Proportion for {machine}")
+
+    # Create the bar chart for downtime percentage
+    fig = px.bar(monthly_downtime, 
+                 x=monthly_downtime.index.astype(str), 
+                 y='Downtime_Percentage', 
+                 title=f'Monthly Downtime Proportion for {machine}',
+                 labels={'Downtime_Percentage': 'Downtime (%)', 'Month': 'Month'})
+    st.plotly_chart(fig)
+
+# In the second column (smaller), show the table
+with col2:
+    st.subheader(f"Downtime Proportion Table for {machine}")
+    st.write(monthly_downtime[['Downtime_Percentage']])
