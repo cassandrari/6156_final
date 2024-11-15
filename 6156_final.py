@@ -31,7 +31,8 @@ st.plotly_chart(fig)
 
 
 
-
+selected_machine_downtime = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
+st.write(selected_machine_downtime[['Month', 'Downtime_Percentage']])
 
 
 
