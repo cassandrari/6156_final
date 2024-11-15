@@ -50,8 +50,12 @@ monthly_downtime_all_machines.columns = ['No Machine Failure', 'Machine Failure'
 monthly_downtime_all_machines['Total_Days'] = monthly_downtime_all_machines['No Machine Failure'] + monthly_downtime_all_machines['Machine Failure']
 monthly_downtime_all_machines['Downtime_Percentage'] = (monthly_downtime_all_machines['Machine Failure'] / monthly_downtime_all_machines['Total_Days']) * 100
 
-# Exclude the first and last month
-monthly_downtime_all_machines = monthly_downtime_all_machines.iloc[1:-1]
+# Exclude the first and last month by using the min and max Month values and excluding those
+min_month = monthly_downtime_all_machines['Month'].min()
+max_month = monthly_downtime_all_machines['Month'].max()
+
+# Filter the data to exclude the first and last month
+monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_all_machines['Month'] > min_month) & (monthly_downtime_all_machines['Month'] < max_month)]
 
 # Reset the index to flatten the MultiIndex
 monthly_downtime_all_machines = monthly_downtime_all_machines.reset_index()
@@ -67,7 +71,7 @@ fig = px.bar(monthly_downtime_all_machines,
              x='Month',  # X-axis: months
              y='Downtime_Percentage',  # Y-axis: downtime percentage
              color='Machine_ID',  # Color bars by machine
-             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
+             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': ' '},
              barmode='group')
 
 # Update the layout of the bar chart:
@@ -77,7 +81,7 @@ fig.update_layout(
     legend=dict(
         orientation="h",  # Horizontal legend
         yanchor="bottom",
-        y=1.1,  # Place it above the chart
+        y=1.1,  # Position above the chart
         xanchor="center",
         x=0.5
     ),
