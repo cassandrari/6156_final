@@ -71,12 +71,12 @@ numeric_features = df[features].select_dtypes(include=['float64', 'int64'])
 df[numeric_features.columns] = numeric_features.fillna(numeric_features.mean())
 
 # Prepare feature matrix (X) and target vector (y)
-X = df[features]
+x = df[features]
 y = df['Downtime']
 
 # Train a Random Forest Classifier to assess feature importance
 model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X, y)
+model.fit(x, y)
 
 # Get the feature importance from the model
 feature_importance = model.feature_importances_
