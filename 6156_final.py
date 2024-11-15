@@ -72,5 +72,5 @@ downtime_proportion_table = selected_machine_data.pivot(index='Machine_ID', colu
 downtime_proportion_table = downtime_proportion_table.drop(columns='Machine_ID', errors='ignore')
 
 # Display the table as horizontal with one row for the selected machine
-st.subheader(f"Downtime Proportion by Month for {machine}")
+st.markdown(f"<h3 style='text-align: center;'>Downtime Proportion by Month</h3>", unsafe_allow_html=True)
 st.table(downtime_proportion_table)
