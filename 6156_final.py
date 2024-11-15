@@ -50,18 +50,18 @@ monthly_downtime_all_machines.columns = ['No Machine Failure', 'Machine Failure'
 monthly_downtime_all_machines['Total_Days'] = monthly_downtime_all_machines['No Machine Failure'] + monthly_downtime_all_machines['Machine Failure']
 monthly_downtime_all_machines['Downtime_Percentage'] = (monthly_downtime_all_machines['Machine Failure'] / monthly_downtime_all_machines['Total_Days']) * 100
 
-# Exclude the first and last month by using the min and max Month values and excluding those
-min_month = monthly_downtime_all_machines['Month'].min()
-max_month = monthly_downtime_all_machines['Month'].max()
-
-# Filter the data to exclude the first and last month
-monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_all_machines['Month'] > min_month) & (monthly_downtime_all_machines['Month'] < max_month)]
-
-# Reset the index to flatten the MultiIndex
+# Reset index to flatten the MultiIndex and make 'Month' a column
 monthly_downtime_all_machines = monthly_downtime_all_machines.reset_index()
 
 # Convert 'Month' to string for proper x-axis labels in the bar chart
 monthly_downtime_all_machines['Month'] = monthly_downtime_all_machines['Month'].astype(str)
+
+# Exclude the first and last month based on the 'Month' column
+min_month = monthly_downtime_all_machines['Month'].min()
+max_month = monthly_downtime_all_machines['Month'].max()
+
+# Filter out the first and last month
+monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_all_machines['Month'] > min_month) & (monthly_downtime_all_machines['Month'] < max_month)]
 
 # Set the title for the layout
 st.title(f"Downtime Comparison for Machine {machine} vs Others")
@@ -71,7 +71,8 @@ fig = px.bar(monthly_downtime_all_machines,
              x='Month',  # X-axis: months
              y='Downtime_Percentage',  # Y-axis: downtime percentage
              color='Machine_ID',  # Color bars by machine
-             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': ' '},
+             title=f"Comparison of Monthly Downtime Proportions",
+             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
              barmode='group')
 
 # Update the layout of the bar chart:
