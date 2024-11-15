@@ -16,7 +16,7 @@ fig = px.bar(monthly_downtime_all_machines,
                  title=f"Comparison of Monthly Downtime Proportions",
                  labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
                  barmode='group')
-    st.plotly_chart(fig)
+st.plotly_chart(fig)
 
 
 #select box
@@ -43,6 +43,12 @@ st.plotly_chart(fig)
 
 
 
+
+
+
+
+
+# Extract month-year for each entry
 df['Month'] = df['Date'].dt.to_period('M')
 
 # Group by machine and month, and count occurrences of 'Machine_Failure' and 'No_Machine_Failure'
@@ -64,29 +70,17 @@ monthly_downtime_all_machines = monthly_downtime_all_machines.reset_index()
 # Convert 'Month' to string for proper x-axis labels in the bar chart
 monthly_downtime_all_machines['Month'] = monthly_downtime_all_machines['Month'].astype(str)
 
-# Create a container to hold both the graph and table
-container = st.container()
+# Set the title for the layout
+st.title(f"Downtime Comparison for Machine {machine} vs Others")
 
-# Set a single overarching title for the entire layout
-container.title(f"Downtime Comparison for Machine {machine} vs Others")
+# Create the bar chart showing monthly downtime proportions for all machines
+fig = px.bar(monthly_downtime_all_machines,
+             x='Month',  # X-axis: months
+             y='Downtime_Percentage',  # Y-axis: downtime percentage
+             color='Machine_ID',  # Color bars by machine
+             title=f"Comparison of Monthly Downtime Proportions",
+             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
+             barmode='group')
 
-# Create columns for layout
-col1, col2 = container.columns([2, 1])  # Graph takes up 2/3 and table takes up 1/3
-
-# In the first column (larger), show the bar chart comparing downtime proportions
-with col1:
-    # Create a comparison bar chart for all machines
-    fig = px.bar(monthly_downtime_all_machines,
-                 x='Month',  # X-axis: months
-                 y='Downtime_Percentage',  # Y-axis: downtime percentage
-                 color='Machine_ID',  # Color bars by machine
-                 title=f"Comparison of Monthly Downtime Proportions",
-                 labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
-                 barmode='group')
-    st.plotly_chart(fig)
-
-# In the second column (smaller), show the table for the selected machine
-with col2:
-    # Filter for the selected machine and show the monthly downtime proportions
-    selected_machine_downtime = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
-    st.write(selected_machine_downtime[['Month', 'Downtime_Percentage']])
+# Display the chart
+st.plotly_chart(fig)
