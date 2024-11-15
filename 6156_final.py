@@ -38,7 +38,6 @@ st.plotly_chart(fig)
 
 
 
-# Extract month-year for each entry
 df['Month'] = df['Date'].dt.to_period('M')
 
 # Group by machine and month, and count occurrences of 'Machine_Failure' and 'No_Machine_Failure'
@@ -71,6 +70,23 @@ fig = px.bar(monthly_downtime_all_machines,
              title=f"Comparison of Monthly Downtime Proportions",
              labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
              barmode='group')
+
+# Update the layout of the bar chart:
+# 1. Move the legend above the chart.
+# 2. Make the bar chart fill the entire width of the screen.
+fig.update_layout(
+    legend=dict(
+        orientation="h",  # Horizontal legend
+        yanchor="bottom",
+        y=1.1,  # Place it above the chart
+        xanchor="center",
+        x=0.5
+    ),
+    xaxis_title="Month",
+    yaxis_title="Downtime Percentage (%)",
+    margin=dict(l=0, r=0, t=50, b=50),  # Adjust margins to allow for full width
+    height=600  # Adjust height for a good aspect ratio
+)
 
 # Display the chart
 st.plotly_chart(fig)
