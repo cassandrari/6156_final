@@ -64,21 +64,25 @@ st.table(downtime_proportion_table)
 
 
 
-target = 'Downtime'
-exclude_columns = ['Machine_ID', 'Downtime', 'Assembly_Line_No', 'Date']
+df['Downtime'] = df['Downtime'].apply(lambda x: 1 if x == 'Machine_downtime' else 0)
 
-# Select features by excluding the specified columns
-features = [col for col in df.columns if col not in exclude_columns]
+# Drop rows where 'Torque' or 'Downtime' is NaN
+df_cleaned = df.dropna(subset=['Torque', 'Downtime'])
 
-# Convert Downtime to binary values (1 for 'Machine_downtime', 0 for 'No_machine_Downtime')
-df[target] = df[target].apply(lambda x: 1 if x == 'Machine_Failure' else 0)
+# Compute correlation between 'Torque' and 'Downtime'
+correlation = df_cleaned['Torque'].corr(df_cleaned['Downtime'])
 
-# Drop rows with missing values in the relevant columns (features and target)
-df_cleaned = df.dropna(subset=features + [target])
+# Display the correlation result in Streamlit
+st.markdown(f"### Correlation Between Torque and Downtime")
+st.write(f"The correlation between `Torque` and `Downtime` is: {correlation:.2f}")
 
-# Calculate the correlation matrix between the features and target
-correlation_matrix = df_cleaned[features + [target]].corr()
+# Visualize the relationship with a scatter plot
+st.markdown("### Scatter Plot Between Torque and Downtime")
+fig, ax = plt.subplots(figsize=(8, 6))
 
-# Display the correlation between features and the target
-st.markdown(f"<h3 style='text-align: center;'>Correlation with Machine Failure (Downtime)</h3>", unsafe_allow_html=True)
-st.write(correlation_matrix[target].sort_values(ascending=False))
+sns.scatterplot(x=df_cleaned['Torque'], y=df_cleaned['Downtime'], ax=ax)
+ax.set_title('Torque vs Downtime')
+ax.set_xlabel('Torque')
+ax.set_ylabel('Downtime (0: No Failure, 1: Failure)')
+
+st.pyplot(fig)
