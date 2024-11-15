@@ -63,17 +63,17 @@ st.table(downtime_proportion_table)
 
 
 
-df_cleaned = df.dropna(subset=['Downtime'])
+df_cleaned = df.dropna(subset=['Hydraulic_Pressure(bar)', 'Coolant_Pressure(bar)', 'Air_System_Pressure(bar)', 'Coolant_Temperature', 'Downtime'])
 
-# Encode the categorical target variable 'Downtime' (if necessary)
+# Encode the target variable 'Downtime' (assuming it's binary: 0 = No Failure, 1 = Failure)
 label_encoder = LabelEncoder()
 df_cleaned['Downtime'] = label_encoder.fit_transform(df_cleaned['Downtime'])
 
-# Features and target
-X = df_cleaned[['Temperature', 'Pressure', 'Operational_Time']]  # Add other relevant features here
+# Select the features and target variable
+X = df_cleaned[['Hydraulic_Pressure(bar)', 'Coolant_Pressure(bar)', 'Air_System_Pressure(bar)', 'Coolant_Temperature']]
 y = df_cleaned['Downtime']
 
-# Split the data for training the model
+# Split the data into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Train a Random Forest model
@@ -93,32 +93,3 @@ importance_df = pd.DataFrame({
 # Display most critical variables
 st.markdown(f"<h3 style='text-align: center;'>Critical Variables Causing Machine Failure</h3>", unsafe_allow_html=True)
 st.table(importance_df)
-
-# --------------- HEALTH SCORE -------------------
-
-# Get the predicted probabilities for the machine's failure
-machine_data = machine_data.sort_values(by='Date')
-X_machine = machine_data[['Temperature', 'Pressure', 'Operational_Time']]  # Adjust features as needed
-
-# Ensure that we are predicting for the selected machine
-if not X_machine.empty:
-    health_probabilities = model.predict_proba(X_machine)[:, 1]  # Probability of failure (class 1)
-    health_scores = 1 - health_probabilities  # Higher probability means worse health, so inverse for health score
-
-    # Add health score to the machine data
-    machine_data['Health_Score'] = health_scores
-
-    # Display health score graph
-    st.markdown(f"<h3 style='text-align: center;'>Health Score of the Machine</h3>", unsafe_allow_html=True)
-    fig_health = px.line(machine_data, 
-                         x='Date', 
-                         y='Health_Score', 
-                         labels={'Date': 'Date', 'Health_Score': 'Health Score'}, 
-                         title=f"Health Score of Machine {machine}")
-    st.plotly_chart(fig_health)
-
-else:
-    st.warning("Not enough data available for health score calculation.")
-
-
-
