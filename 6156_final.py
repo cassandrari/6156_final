@@ -66,7 +66,7 @@ df['Downtime'] = le.fit_transform(df['Downtime'])
 # Include numerical columns such as hydraulic pressure, temperature, etc.
 # Assuming you have some numeric columns like 'Hydraulic_Pressure', 'Temperature', 'Humidity', etc.
 # Replace with your actual columns.
-features = ['Hydraulic_Pressure', 'Temperature', 'Humidity', 'Vibration']  # Replace with real feature names
+features = [col for col in df.columns if col not in ['Machine_ID', 'Downtime', 'Date']]
 
 # Handle missing values by filling with the mean (or another imputation strategy)
 df = df[features].fillna(df.mean())
