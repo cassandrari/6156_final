@@ -15,8 +15,6 @@ machine_data = df[df['Machine_ID'] == machine]
 
 
 
-st.markdown(f"<br><br><br><h3, unsafe_allow_html=True)
-
 
 
 #trend analysis
