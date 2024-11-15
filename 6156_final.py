@@ -63,26 +63,3 @@ st.table(downtime_proportion_table)
 
 
 
-
-df['Downtime'] = df['Downtime'].apply(lambda x: 1 if x == 'Machine_downtime' else 0)
-
-# Drop rows where 'Torque' or 'Downtime' is NaN
-df_cleaned = df.dropna(subset=['Torque', 'Downtime'])
-
-# Compute correlation between 'Torque' and 'Downtime'
-correlation = df_cleaned['Torque'].corr(df_cleaned['Downtime'])
-
-# Display the correlation result in Streamlit
-st.markdown(f"### Correlation Between Torque and Downtime")
-st.write(f"The correlation between `Torque` and `Downtime` is: {correlation:.2f}")
-
-# Visualize the relationship with a scatter plot
-st.markdown("### Scatter Plot Between Torque and Downtime")
-fig, ax = plt.subplots(figsize=(8, 6))
-
-sns.scatterplot(x=df_cleaned['Torque'], y=df_cleaned['Downtime'], ax=ax)
-ax.set_title('Torque vs Downtime')
-ax.set_xlabel('Torque')
-ax.set_ylabel('Downtime (0: No Failure, 1: Failure)')
-
-st.pyplot(fig)
