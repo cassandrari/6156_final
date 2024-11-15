@@ -63,7 +63,7 @@ le = LabelEncoder()
 df['Downtime'] = le.fit_transform(df['Downtime'])  # 'Machine Failure' -> 1, 'No Machine Failure' -> 0
 
 # Dynamically select all columns except 'Machine_ID' and 'Downtime' for prediction
-features = [col for col in df.columns if col not in ['Machine_ID', 'Downtime', 'Date']]
+features = [col for col in df.columns if col not in ['Machine_ID', 'Downtime', 'Date','Assembly_Line_No']]
 
 # Handle missing values by filling with the column's mean (other strategies like median or mode may also work)
 # Select only numeric columns and fill missing values in these columns
