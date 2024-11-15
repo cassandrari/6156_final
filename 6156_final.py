@@ -67,7 +67,6 @@ fig = px.bar(monthly_downtime_all_machines,
              x='Month',  # X-axis: months
              y='Downtime_Percentage',  # Y-axis: downtime percentage
              color='Machine_ID',  # Color bars by machine
-             title=f"Comparison of Monthly Downtime Proportions",
              labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
              barmode='group')
 
