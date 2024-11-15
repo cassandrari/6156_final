@@ -49,19 +49,23 @@ monthly_downtime = monthly_downtime.iloc[1:-1]
 # Create columns for layout
 col1, col2 = st.columns([2, 1])  # Graph takes up 2/3 and table takes up 1/3
 
-# In the first column (larger), show the graph
+# In the first column (larger), show the line chart
 with col1:
-    st.subheader(f"Monthly Downtime Proportion for {machine}")
+    st.subheader(f"Downtime Trend for {machine}")
+    
+    # Group by Date and count failure events ('Machine_Failure' and 'No_Machine_Failure')
+    downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
+    downtime_trends.columns = ['No Machine Failure', 'Machine Failure']  # Rename the columns for clarity
 
-    # Create the bar chart for downtime percentage
-    fig = px.bar(monthly_downtime, 
-                 x=monthly_downtime.index.astype(str), 
-                 y='Downtime_Percentage', 
-                 title=f'Monthly Downtime Proportion for {machine}',
-                 labels={'Downtime_Percentage': 'Downtime (%)', 'Month': 'Month'})
+    # Create the line chart for downtime trend
+    fig = px.line(downtime_trends, 
+                  x=downtime_trends.index, 
+                  y='Machine Failure', 
+                  title=f'Downtime Trend for {machine}', 
+                  labels={'Date': 'Date', 'Machine Failure': 'Machine Failure Events'})
     st.plotly_chart(fig)
 
 # In the second column (smaller), show the table
 with col2:
-    st.subheader(f"Downtime Proportion Table for {machine}")
+    st.subheader(f"Monthly Downtime Proportion Table for {machine}")
     st.write(monthly_downtime[['Downtime_Percentage']])
