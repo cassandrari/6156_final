@@ -9,6 +9,16 @@ df['Date'] = pd.to_datetime(df['Date'])
 df = df[df['Date'] >= '2021-12-20']
 machines = df['Machine_ID'].unique()
 
+fig = px.bar(monthly_downtime_all_machines,
+                 x='Month',  # X-axis: months
+                 y='Downtime_Percentage',  # Y-axis: downtime percentage
+                 color='Machine_ID',  # Color bars by machine
+                 title=f"Comparison of Monthly Downtime Proportions",
+                 labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
+                 barmode='group')
+    st.plotly_chart(fig)
+
+
 #select box
 machine = st.selectbox("Select Machine", machines)
 machine_data = df[df['Machine_ID'] == machine]
