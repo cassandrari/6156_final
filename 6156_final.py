@@ -74,4 +74,3 @@ with col2:
     # Filter for the selected machine and show the monthly downtime proportions
     selected_machine_downtime = monthly_downtime_all_machines.xs(machine, level='Machine_ID')
     st.write(selected_machine_downtime[['Downtime_Percentage']])
-Key Updates:
