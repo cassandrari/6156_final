@@ -31,48 +31,26 @@ st.plotly_chart(fig)
 
 
 
+machine_data['Month'] = machine_data['Date'].dt.to_period('M')
 
-downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
-
-# Rename the columns for clarity
-downtime_trends.columns = ['No Machine Failure', 'Machine Failure']  # Rename the columns
-
-# Calculate Monthly Downtime
-machine_data['Month'] = machine_data['Date'].dt.to_period('M')  # Extract month-year from date
+# Group by month and count occurrences of 'Machine_Failure' and 'No_Machine_Failure'
 monthly_downtime = machine_data.groupby('Month')['Downtime'].value_counts().unstack(fill_value=0)
 
 # Rename the columns for clarity
 monthly_downtime.columns = ['No Machine Failure', 'Machine Failure']
 
-# Calculate the percentage of downtime for each month
+# Calculate total days in each month and downtime percentage
 monthly_downtime['Total_Days'] = monthly_downtime['No Machine Failure'] + monthly_downtime['Machine Failure']
 monthly_downtime['Downtime_Percentage'] = (monthly_downtime['Machine Failure'] / monthly_downtime['Total_Days']) * 100
 
-# Identify months where downtime is greater than 10%
-major_downtime_months = monthly_downtime[monthly_downtime['Downtime_Percentage'] > 10]
+# Display the downtime percentage as a table
+st.subheader(f"Monthly Downtime Proportion for {machine}")
+st.write(monthly_downtime[['Downtime_Percentage']])
 
-# Create the line chart for daily downtime trend
-st.subheader(f"Downtime Trend for {machine}")
-
-# Create Plotly figure for downtime trend
-fig = px.line(downtime_trends, 
-              x=downtime_trends.index, 
-              y='Machine Failure', 
-              title=f'Downtime Trend for {machine}', 
-              labels={'Date': 'Date', 'Machine Failure': 'Machine Failure Events'})
-
-# Highlight months where downtime is greater than 10% with vertical rectangles
-for month in major_downtime_months.index:
-    # Find the first and last day of the month
-    start_date = month.start_time
-    end_date = month.end_time
-
-    # Add vertical rectangles to highlight the month
-    fig.add_vrect(x0=start_date, 
-                  x1=end_date, 
-                  fillcolor="red", 
-                  opacity=0.2, 
-                  line_width=0)
-
-# Display the plot
+# Optionally, you can visualize the downtime percentage as a bar chart
+fig = px.bar(monthly_downtime, 
+             x=monthly_downtime.index.astype(str), 
+             y='Downtime_Percentage', 
+             title=f'Monthly Downtime Proportion for {machine}',
+             labels={'Downtime_Percentage': 'Downtime (%)', 'Month': 'Month'})
 st.plotly_chart(fig)
