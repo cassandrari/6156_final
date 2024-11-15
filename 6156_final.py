@@ -63,33 +63,22 @@ st.table(downtime_proportion_table)
 
 
 
-df_cleaned = df.dropna(subset=['Hydraulic_Pressure(bar)', 'Coolant_Pressure(bar)', 'Air_System_Pressure(bar)', 'Coolant_Temperature', 'Downtime'])
 
-# Encode the target variable 'Downtime' (assuming it's binary: 0 = No Failure, 1 = Failure)
-label_encoder = LabelEncoder()
-df_cleaned['Downtime'] = label_encoder.fit_transform(df_cleaned['Downtime'])
+target = 'Downtime'
+exclude_columns = ['Machine_ID', 'Downtime', 'Assembly_Line_No', 'Date']
 
-# Select the features and target variable
-X = df_cleaned[['Hydraulic_Pressure(bar)', 'Coolant_Pressure(bar)', 'Air_System_Pressure(bar)', 'Coolant_Temperature']]
-y = df_cleaned['Downtime']
+# Select features by excluding the specified columns
+features = [col for col in df.columns if col not in exclude_columns]
 
-# Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Convert Downtime to binary values (1 for 'Machine_downtime', 0 for 'No_machine_Downtime')
+df[target] = df[target].apply(lambda x: 1 if x == 'Machine_Failure' else 0)
 
-# Train a Random Forest model
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X_train, y_train)
+# Drop rows with missing values in the relevant columns (features and target)
+df_cleaned = df.dropna(subset=features + [target])
 
-# Get feature importances
-feature_importances = model.feature_importances_
-feature_names = X.columns
+# Calculate the correlation matrix between the features and target
+correlation_matrix = df_cleaned[features + [target]].corr()
 
-# Create a DataFrame to display the critical variables and their importance
-importance_df = pd.DataFrame({
-    'Feature': feature_names,
-    'Importance': feature_importances
-}).sort_values(by='Importance', ascending=False)
-
-# Display most critical variables
-st.markdown(f"<h3 style='text-align: center;'>Critical Variables Causing Machine Failure</h3>", unsafe_allow_html=True)
-st.table(importance_df)
+# Display the correlation between features and the target
+st.markdown(f"<h3 style='text-align: center;'>Correlation with Machine Failure (Downtime)</h3>", unsafe_allow_html=True)
+st.write(correlation_matrix[target].sort_values(ascending=False))
