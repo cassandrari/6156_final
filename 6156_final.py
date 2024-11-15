@@ -71,26 +71,8 @@ fig = px.bar(monthly_downtime_all_machines,
              x='Month',  # X-axis: months
              y='Downtime_Percentage',  # Y-axis: downtime percentage
              color='Machine_ID',  # Color bars by machine
-             title=f"Comparison of Monthly Downtime Proportions",
-             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': 'Machine'},
+             labels={'Downtime_Percentage': 'Downtime Percentage (%)', 'Month': 'Month', 'Machine_ID': ' '},
              barmode='group')
-
-# Update the layout of the bar chart:
-# 1. Move the legend above the chart.
-# 2. Make the bar chart fill the entire width of the screen.
-fig.update_layout(
-    legend=dict(
-        orientation="h",  # Horizontal legend
-        yanchor="bottom",
-        y=1.1,  # Position above the chart
-        xanchor="center",
-        x=0.5
-    ),
-    xaxis_title="Month",
-    yaxis_title="Downtime Percentage (%)",
-    margin=dict(l=0, r=0, t=50, b=50),  # Adjust margins to allow for full width
-    height=600  # Adjust height for a good aspect ratio
-)
 
 # Display the chart
 st.plotly_chart(fig)
