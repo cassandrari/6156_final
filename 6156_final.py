@@ -62,10 +62,10 @@ monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_
 selected_machine_data = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
 
 # Create a horizontal table: 'Month' will be columns, downtime proportion will be the row
-downtime_proportion_table = selected_machine_data.pivot(index='Machine_ID', columns='Month', values='Downtime_Percentage')
+downtime_proportion_table = selected_machine_data.pivot(columns='Month', values='Downtime_Percentage')
 
 # Display the table as horizontal
-st.subheader(f"Downtime Proportion for {machine} by Month")
+st.subheader(f"Downtime Proportion by Month")
 st.table(downtime_proportion_table)
 
 
