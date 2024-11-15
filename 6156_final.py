@@ -32,9 +32,13 @@ st.plotly_chart(fig)
 
 
 
-monthly_downtime_all_machines = df.groupby(['Machine_ID', 'Month'])['Downtime'].value_counts().unstack(fill_value=0)
+df['Month'] = df['Date'].dt.to_period('M')
 
-# Rename the columns for clarity
+# Group by machine and month, and count occurrences of 'Machine Failure' and 'No Machine Failure'
+# We need to use .value_counts() for each month and machine, and then unstack them to get the counts
+monthly_downtime_all_machines = df.groupby(['Machine_ID', 'Month', 'Downtime']).size().unstack(fill_value=0)
+
+# Rename the columns for clarity (after unstack, 'Machine Failure' and 'No Machine Failure' should be the columns)
 monthly_downtime_all_machines.columns = ['No Machine Failure', 'Machine Failure']
 
 # Calculate total days in each month and downtime percentage for all machines
@@ -63,7 +67,6 @@ downtime_proportion_table = selected_machine_data.pivot(index='Machine_ID', colu
 # Display the table as horizontal
 st.subheader(f"Downtime Proportion for {machine} by Month")
 st.table(downtime_proportion_table)
-
 
 
 
