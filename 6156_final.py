@@ -15,13 +15,12 @@ machine_data = df[df['Machine_ID'] == machine]
 
 #trend analysis
 machine_data = machine_data.sort_values(by='Date')
-st.subheader(f"Downtime Trend for {machine}")
+st.markdown(f"<h3 style='text-align: center;'>Downtime Trends by Month</h3>", unsafe_allow_html=True)
 downtime_trends = machine_data.groupby('Date')['Downtime'].value_counts().unstack(fill_value=0)
 downtime_trends.columns = ['No Downtime', 'Downtime']  # Rename columns for clarity
 fig = px.line(downtime_trends, 
               x=downtime_trends.index, 
               y='Downtime', 
-              title=f'Downtime Trend for {machine}', 
               labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
 st.plotly_chart(fig)
 
