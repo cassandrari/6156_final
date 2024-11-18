@@ -14,17 +14,29 @@ machines = df['Machine_ID'].unique()
 
 # select box
 machine = st.selectbox("Select Machine", ["Overview of All"] + list(machines))
-machine_data = df[df['Machine_ID'] == machine] if machine != "Overview of All" else df
 
-# Trend analysis (only for specific machine, not "Overview of All")
+# Filtering data based on the selected machine
 if machine != "Overview of All":
+    machine_data = df[df['Machine_ID'] == machine]
+else:
+    machine_data = df
+
+# Trend analysis (only for a specific machine, not "Overview of All")
+if machine != "Overview of All":
+    # Sort data by Date for correct trend visualization
     machine_data = machine_data.sort_values(by='Date')
     st.markdown(f"<h3 style='text-align: center;'>Downtime Trends by Month</h3>", unsafe_allow_html=True)
-    downtime_trends = machine_data.groupby('Date')['Downtime'].sum()
+    
+    # Group by Date and sum downtime for the selected machine
+    downtime_trends = machine_data.groupby('Date')['Downtime'].sum().reset_index()
+    
+    # Plot the downtime trends for the selected machine
     fig = px.line(downtime_trends, 
-                  x=downtime_trends.index, 
-                  y=downtime_trends, 
-                  labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
+                  x='Date', 
+                  y='Downtime', 
+                  labels={'Date': 'Date', 'Downtime': 'Downtime Events'},
+                  title=f"Downtime Trend for Machine {machine}")
+    
     st.plotly_chart(fig)
 
 # Proportion by month table
