@@ -49,6 +49,7 @@ max_month = monthly_downtime_all_machines['Month'].max()
 monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_all_machines['Month'] > min_month) & (monthly_downtime_all_machines['Month'] < max_month)]
 selected_machine_data = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
 downtime_proportion_table = selected_machine_data.pivot(index='Machine_ID', columns='Month', values='Downtime_Percentage')
+downtime_proportion_table = downtime_proportion_table.round(1)
 downtime_proportion_table = downtime_proportion_table.drop(columns='Machine_ID', errors='ignore')
 st.markdown(f"<h3 style='text-align: center;'>Downtime Proportion by Month</h3>", unsafe_allow_html=True)
 st.table(downtime_proportion_table)
