@@ -16,15 +16,16 @@ machines = df['Machine_ID'].unique()
 machine = st.selectbox("Select Machine", ["Overview of All"] + list(machines))
 machine_data = df[df['Machine_ID'] == machine] if machine != "Overview of All" else df
 
-# Trend analysis
-machine_data = machine_data.sort_values(by='Date')
-st.markdown(f"<h3 style='text-align: center;'>Downtime Trends by Month</h3>", unsafe_allow_html=True)
-downtime_trends = machine_data.groupby('Date')['Downtime'].sum()
-fig = px.line(downtime_trends, 
-              x=downtime_trends.index, 
-              y=downtime_trends, 
-              labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
-st.plotly_chart(fig)
+# Trend analysis (only for specific machine, not "Overview of All")
+if machine != "Overview of All":
+    machine_data = machine_data.sort_values(by='Date')
+    st.markdown(f"<h3 style='text-align: center;'>Downtime Trends by Month</h3>", unsafe_allow_html=True)
+    downtime_trends = machine_data.groupby('Date')['Downtime'].sum()
+    fig = px.line(downtime_trends, 
+                  x=downtime_trends.index, 
+                  y=downtime_trends, 
+                  labels={'Date': 'Date', 'Downtime': 'Downtime Events'})
+    st.plotly_chart(fig)
 
 # Proportion by month table
 df['Month'] = df['Date'].dt.to_period('M')
@@ -39,13 +40,21 @@ min_month = monthly_downtime_all_machines['Month'].min()
 max_month = monthly_downtime_all_machines['Month'].max()
 monthly_downtime_all_machines = monthly_downtime_all_machines[(monthly_downtime_all_machines['Month'] > min_month) & (monthly_downtime_all_machines['Month'] < max_month)]
 
-# If "Overview of All" is selected, show a downtime ranking for all machines per month
+# If "Overview of All" is selected, show downtime averages for all machines per month
 if machine == "Overview of All":
-    ranking_df = monthly_downtime_all_machines.groupby(['Month', 'Machine_ID'])['Downtime_Percentage'].sum().reset_index()
-    ranking_df['Rank'] = ranking_df.groupby('Month')['Downtime_Percentage'].rank(ascending=False, method='min')
-    ranking_df = ranking_df.sort_values(by=['Month', 'Rank'])
-    st.markdown(f"<h3 style='text-align: center;'>Machine Downtime Rankings by Month</h3>", unsafe_allow_html=True)
-    st.table(ranking_df[['Month', 'Machine_ID', 'Downtime_Percentage', 'Rank']])
+    # Calculate the average downtime percentage per machine for each month
+    monthly_avg_downtime = monthly_downtime_all_machines.groupby(['Machine_ID', 'Month'])['Downtime_Percentage'].mean().reset_index()
+    
+    # Pivot the table to get months as columns and machines as rows
+    downtime_avg_table = monthly_avg_downtime.pivot(index='Machine_ID', columns='Month', values='Downtime_Percentage')
+    
+    # Rank machines based on their average downtime for each month
+    ranked_table = downtime_avg_table.rank(axis=0, ascending=False, method='min')  # Rank by columns (months)
+    
+    st.markdown(f"<h3 style='text-align: center;'>Machine Downtime Averages & Rankings by Month</h3>", unsafe_allow_html=True)
+    
+    # Show the ranking table with machine downtimes
+    st.table(ranked_table)
 else:
     # Show downtime proportion for the selected machine
     selected_machine_data = monthly_downtime_all_machines[monthly_downtime_all_machines['Machine_ID'] == machine]
